@@ -47,18 +47,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final EditText editText_insert = findViewById(R.id.editText_insert);
-        editText_insert.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == event.KEYCODE_ENTER){
-                    if (!(editText_insert.getText().toString()).equals("")){
-                        viewModel.insert(new Movie(Integer.valueOf(editText_insert.getText().toString())));
-                        editText_insert.setText("");
-                    }
-                }
-                return false;
-            }
-        });
     }
 }
