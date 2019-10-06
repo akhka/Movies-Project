@@ -15,6 +15,7 @@ public class MovieViewModel extends AndroidViewModel {
 
     private MovieRepository repository;
     private LiveData<List<Movie>> allMovies;
+    private List<Movie> moviesList;
 
     public MovieViewModel(@NonNull Application application) {
         super(application);
@@ -35,5 +36,10 @@ public class MovieViewModel extends AndroidViewModel {
 
     public LiveData<List<Movie>> getAllMovies(){
         return allMovies;
+    }
+
+    public List<Movie> getById(){
+        moviesList = repository.getById();
+        return moviesList;
     }
 }

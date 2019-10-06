@@ -7,7 +7,7 @@ import java.util.List;
 
 public class MovieResponse {
 
-    @SerializedName("result")
+    @SerializedName("results")
     @Expose
     private List<Movie> movies;
 

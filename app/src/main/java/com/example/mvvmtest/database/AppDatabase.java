@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteOpenHelper;
 
 import com.example.mvvmtest.model.Movie;
 
-@Database(entities = {Movie.class}, version = 1)
+@Database(entities = {Movie.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
         private static AppDatabase instanse;
 
@@ -52,12 +52,6 @@ public abstract class AppDatabase extends RoomDatabase {
 
                 @Override
                 protected Void doInBackground(Void... voids) {
-                        movieDao.insert(new Movie(1));
-                        movieDao.insert(new Movie(2));
-                        movieDao.insert(new Movie(3));
-                        movieDao.insert(new Movie(4));
-                        movieDao.insert(new Movie(5));
-                        movieDao.insert(new Movie(6));
                         return null;
                 }
         }

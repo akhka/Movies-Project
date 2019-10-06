@@ -15,7 +15,7 @@ public class MovieRepository {
 
     private MovieDao movieDao;
     private LiveData<List<Movie>> allMovies;
-    private Movie movie;
+    public List<Movie> movies;
 
     public MovieRepository(Application application){
         AppDatabase db = AppDatabase.getInstance(application);
@@ -34,8 +34,11 @@ public class MovieRepository {
     }
 
 
-    public Movie getById(int movieId){
-        return movie;
+    public List<Movie> getById(){
+        GetTask gt = new GetTask(movieDao);
+        gt.execute();
+        movies = gt.getMovie();
+        return movies;
     }
 
 
@@ -74,6 +77,27 @@ public class MovieRepository {
         protected Void doInBackground(Integer... integers) {
             movieDao.deleteById(integers[0]);
             return null;
+        }
+    }
+
+    private static class GetTask extends AsyncTask<Void, Void, Void>{
+
+        MovieDao movieDao;
+        List<Movie> movie;
+
+        private GetTask(MovieDao movieDao){
+            this.movieDao = movieDao;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            movie = movieDao.loadMovie();
+            return null;
+        }
+
+        public List<Movie> getMovie(){
+            return movie;
         }
     }
 
