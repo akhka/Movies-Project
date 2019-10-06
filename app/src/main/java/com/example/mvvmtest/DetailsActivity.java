@@ -2,30 +2,46 @@ package com.example.mvvmtest;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.mvvmtest.adapters.ReviewRecyclerAdapter;
+import com.example.mvvmtest.adapters.TrailerRecyclerAdapter;
 import com.example.mvvmtest.model.Movie;
+import com.example.mvvmtest.model.Review;
+import com.example.mvvmtest.model.ReviewResponse;
+import com.example.mvvmtest.model.Trailer;
+import com.example.mvvmtest.model.TrailerResponse;
+import com.example.mvvmtest.network.ApiClient;
+import com.example.mvvmtest.network.ApiService;
 import com.example.mvvmtest.viewmodel.MovieViewModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.mvvmtest.utils.Constants.IMAGE_BASE_URL;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class DetailsActivity extends AppCompatActivity {
+import static com.example.mvvmtest.utils.Constants.IMAGE_BASE_URL;
+import static com.example.mvvmtest.utils.Constants.TMDB_API_KEY;
+
+public class DetailsActivity extends AppCompatActivity implements TrailerRecyclerAdapter.ListItemClickListener {
 
     private int movieId;
     private boolean isFav = false;
     private MovieViewModel viewModel;
-    private List<Movie> checkMovie;
+    private List<Review> reviews = new ArrayList<>();
 
     ImageView imageView_details;
     ProgressBar progressBar_favorite_check;
@@ -56,7 +72,13 @@ public class DetailsActivity extends AppCompatActivity {
         textView_detail_release = findViewById(R.id.textView_detail_release);
 
         recyclerView_trailers = findViewById(R.id.recyclerView_trailers);
+        recyclerView_trailers.setLayoutManager(new LinearLayoutManager(this));
+        TrailerRecyclerAdapter trailerAdapter = new TrailerRecyclerAdapter();
+        recyclerView_trailers.setAdapter(trailerAdapter);
         recyclerView_reviews = findViewById(R.id.recyclerView_reviews);
+        recyclerView_reviews.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        ReviewRecyclerAdapter reviewAdapter = new ReviewRecyclerAdapter();
+        recyclerView_reviews.setAdapter(reviewAdapter);
 
 
 
@@ -107,5 +129,68 @@ public class DetailsActivity extends AppCompatActivity {
             }
         });
 
+        getMovieReviews(movieId, (ReviewRecyclerAdapter) recyclerView_reviews.getAdapter());
+        getMovieTrailers(movieId, (TrailerRecyclerAdapter) recyclerView_trailers.getAdapter());
+
+
+    }
+
+
+    public void getMovieReviews(int movieId, final ReviewRecyclerAdapter adapter){
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        Call<ReviewResponse> call = apiService.getReviews(movieId, TMDB_API_KEY);
+        call.enqueue(new Callback<ReviewResponse>() {
+            @Override
+            public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
+                if (!response.isSuccessful()){
+                    Toast.makeText(DetailsActivity.this, "code: " + response.code(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                ReviewResponse result = response.body();
+                reviews = result.getReviews();
+                System.out.println(reviews.get(0).getAuthor());
+                adapter.setReviews(reviews);
+            }
+
+            @Override
+            public void onFailure(Call<ReviewResponse> call, Throwable t) {
+                Toast.makeText(DetailsActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+
+    public void getMovieTrailers(int movieId, final TrailerRecyclerAdapter adapter){
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        Call<TrailerResponse> call = apiService.getTrailers(movieId, TMDB_API_KEY);
+        call.enqueue(new Callback<TrailerResponse>() {
+            @Override
+            public void onResponse(Call<TrailerResponse> call, Response<TrailerResponse> response) {
+                if (!response.isSuccessful()){
+                    Toast.makeText(DetailsActivity.this, "code: " + response.code(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                TrailerResponse result = response.body();
+                List<Trailer> trailers = result.getTrailers();
+                adapter.setTrailers(trailers);
+            }
+
+            @Override
+            public void onFailure(Call<TrailerResponse> call, Throwable t) {
+                Toast.makeText(DetailsActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onListItemClick(Trailer trailer) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
+        intent.setData(Uri.parse("https://www.youtube.com/watch?v=" + trailer.getKey()));
+        startActivity(intent);
     }
 }
