@@ -12,6 +12,7 @@ import androidx.room.Room;
 import androidx.transition.Fade;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -79,14 +80,23 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
         adapter.setOnItemClickListener(this);
         recycler_movies.setAdapter(adapter);
 
-        populateUI(recycler_movies);
-
         viewModel = ViewModelProviders.of(this).get(MovieViewModel.class);
 
+        if (savedInstanceState != null){
+            SELECTED = savedInstanceState.getInt("menu_id");
+        }
 
+        populateUI(recycler_movies);
 
     }
 
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt("menu_id", SELECTED);
+    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener onNavListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
@@ -114,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
             return false;
         }
     };
+
 
 
     public void populateUI(RecyclerView recyclerView) {

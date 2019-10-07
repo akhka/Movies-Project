@@ -4,7 +4,7 @@ public class Constants {
 
 
     //TODO: Put your API key here
-    public final static String TMDB_API_KEY = "YOUR API KEY";
+    public final static String TMDB_API_KEY = "TMDB_API_KEY";
 
     public final static String BASE_URL = "https://api.themoviedb.org/3/";
     public final static String IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
