@@ -14,7 +14,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/layout_movie_item" />
+        tools:listitem="@layout/layout_movie_item"
+        android:layoutAnimation="@anim/layout_animation_fall_down"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav_home"

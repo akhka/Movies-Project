@@ -22,6 +22,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
 
     private List<Movie> movies = new ArrayList<>();
     private RecyclerOnItemClickListener listener;
+    private ImageView imageView;
 
 
     public void setOnItemClickListener(RecyclerOnItemClickListener listener){
@@ -52,6 +53,11 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
         notifyDataSetChanged();
     }
 
+
+    public ImageView getImageView(){
+        return imageView;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imageView_movie_list;
@@ -59,6 +65,7 @@ public class MovieListAdapter extends RecyclerView.Adapter<MovieListAdapter.View
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView_movie_list = itemView.findViewById(R.id.imageView_movie_list);
+            imageView = imageView_movie_list;
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

@@ -1,7 +1,11 @@
 <resources>
-    <string name="app_name">MVVM Test</string>
-    <string name="original_title">Original Title</string>
+    <string name="app_name">Popular Movies</string>
+    <string name="original_title">Title</string>
     <string name="overview">Overview</string>
     <string name="rating">Rating</string>
     <string name="release_date">Release Date</string>
+    <string name="author">Author</string>
+    <string name="content">Content</string>
+    <string name="trailers">TRAILERS</string>
+    <string name="reviews">REVIEWS</string>
 </resources>

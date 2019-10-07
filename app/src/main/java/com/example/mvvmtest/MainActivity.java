@@ -2,11 +2,14 @@ package com.example.mvvmtest;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.view.ViewCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
+import androidx.transition.Fade;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -17,7 +20,10 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.mvvmtest.adapters.MovieListAdapter;
@@ -42,6 +48,8 @@ import static com.example.mvvmtest.utils.Constants.LANGUAGE;
 import static com.example.mvvmtest.utils.Constants.TMDB_API_KEY;
 
 public class MainActivity extends AppCompatActivity implements RecyclerOnItemClickListener {
+
+    // TODO: Go to Constants.java and put your own TMDB API key
 
     Handler mainHandler;
 
@@ -140,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
                     return;
                 }
                 MovieResponse result = response.body();
-                String s = response.toString();
                 List<Movie> list = result.getMovies();
                 adapter.setMovies(list);
                 mMovies = list;

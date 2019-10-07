@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mvvmtest.adapters.ReviewRecyclerAdapter;
+import com.example.mvvmtest.adapters.TrailerOnItemClickListener;
 import com.example.mvvmtest.adapters.TrailerRecyclerAdapter;
 import com.example.mvvmtest.model.Movie;
 import com.example.mvvmtest.model.Review;
@@ -36,12 +37,13 @@ import retrofit2.Response;
 import static com.example.mvvmtest.utils.Constants.IMAGE_BASE_URL;
 import static com.example.mvvmtest.utils.Constants.TMDB_API_KEY;
 
-public class DetailsActivity extends AppCompatActivity implements TrailerRecyclerAdapter.ListItemClickListener {
+public class DetailsActivity extends AppCompatActivity implements TrailerOnItemClickListener {
 
     private int movieId;
     private boolean isFav = false;
     private MovieViewModel viewModel;
     private List<Review> reviews = new ArrayList<>();
+    private List<Trailer> trailers = new ArrayList<>();
 
     ImageView imageView_details;
     ProgressBar progressBar_favorite_check;
@@ -72,11 +74,12 @@ public class DetailsActivity extends AppCompatActivity implements TrailerRecycle
         textView_detail_release = findViewById(R.id.textView_detail_release);
 
         recyclerView_trailers = findViewById(R.id.recyclerView_trailers);
-        recyclerView_trailers.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_trailers.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         TrailerRecyclerAdapter trailerAdapter = new TrailerRecyclerAdapter();
+        trailerAdapter.setOnItemClickListener(this);
         recyclerView_trailers.setAdapter(trailerAdapter);
         recyclerView_reviews = findViewById(R.id.recyclerView_reviews);
-        recyclerView_reviews.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerView_reviews.setLayoutManager(new LinearLayoutManager(this));
         ReviewRecyclerAdapter reviewAdapter = new ReviewRecyclerAdapter();
         recyclerView_reviews.setAdapter(reviewAdapter);
 
@@ -87,6 +90,11 @@ public class DetailsActivity extends AppCompatActivity implements TrailerRecycle
         movieId = intent.getIntExtra("id", 0);
 
         Picasso.get().load(IMAGE_BASE_URL + intent.getStringExtra("posterUrl")).into(imageView_details);
+
+        textView_detail_title.setText(intent.getStringExtra("title"));
+        textView_detail_overview.setText(intent.getStringExtra("overview"));
+        textView_detail_avgRate.setText(String.valueOf(intent.getFloatExtra("rating", 0)) + "  of  10");
+        textView_detail_release.setText(intent.getStringExtra("releaseDate"));
 
         if (intent.getBooleanExtra("isFav", false) == true){
             imageView_favorited.setImageResource(R.drawable.ic_added);
@@ -109,6 +117,7 @@ public class DetailsActivity extends AppCompatActivity implements TrailerRecycle
                     viewModel.deleteById(movieId);
                     imageView_favorited.setImageResource(R.drawable.ic_not_added);
                     isFav = false;
+                    Toast.makeText(DetailsActivity.this, "Removed from Favorite", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     Movie movie = new Movie();
@@ -122,6 +131,7 @@ public class DetailsActivity extends AppCompatActivity implements TrailerRecycle
                     viewModel.insert(movie);
                     imageView_favorited.setImageResource(R.drawable.ic_added);
                     isFav = true;
+                    Toast.makeText(DetailsActivity.this, "Adeed to Favorite", Toast.LENGTH_SHORT).show();
                 }
 
                 progressBar_favorite_check.setVisibility(View.GONE);
@@ -174,7 +184,7 @@ public class DetailsActivity extends AppCompatActivity implements TrailerRecycle
                 }
 
                 TrailerResponse result = response.body();
-                List<Trailer> trailers = result.getTrailers();
+                trailers = result.getTrailers();
                 adapter.setTrailers(trailers);
             }
 
@@ -186,7 +196,8 @@ public class DetailsActivity extends AppCompatActivity implements TrailerRecycle
     }
 
     @Override
-    public void onListItemClick(Trailer trailer) {
+    public void onItemClickListener(int position) {
+        Trailer trailer = trailers.get(position);
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
         intent.addCategory(Intent.CATEGORY_BROWSABLE);

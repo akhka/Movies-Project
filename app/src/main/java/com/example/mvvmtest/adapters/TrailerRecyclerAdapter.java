@@ -21,14 +21,11 @@ public class TrailerRecyclerAdapter extends RecyclerView.Adapter<TrailerRecycler
 
 
     private List<Trailer> trailers = new ArrayList<>();
-    private ListItemClickListener listener;
+    private TrailerOnItemClickListener listener;
 
-    //Interface
-    public interface ListItemClickListener {
-
-        void onListItemClick(Trailer trailer);
+    public void setOnItemClickListener(TrailerOnItemClickListener listener){
+        this.listener = listener;
     }
-
 
     @NonNull
     @Override
@@ -54,25 +51,25 @@ public class TrailerRecyclerAdapter extends RecyclerView.Adapter<TrailerRecycler
         notifyDataSetChanged();
     }
 
-    public void setListener(ListItemClickListener listener){
-        this.listener = listener;
-    }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView img_View_trailer;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             img_View_trailer = itemView.findViewById(R.id.img_View_trailer);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
-            Trailer videoClick = trailers.get(adapterPosition);
-            listener.onListItemClick(videoClick);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null){
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION){
+                            listener.onItemClickListener(position);
+                        }
+                    }
+                }
+            });
         }
     }
 }
