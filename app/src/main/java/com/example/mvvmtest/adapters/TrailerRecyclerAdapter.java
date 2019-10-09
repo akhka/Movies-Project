@@ -37,7 +37,8 @@ public class TrailerRecyclerAdapter extends RecyclerView.Adapter<TrailerRecycler
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Trailer trailer = trailers.get(position);
-        Picasso.get().load("http://img.youtube.com/vi/" + trailer.getKey() + "/0.jpg").into(holder.img_View_trailer);
+        System.out.println(trailer.getKey());
+        Picasso.get().load("http://img.youtube.com/vi/" + trailer.getKey() + "/0.jpg").into(holder.imageView_trailer);
     }
 
     @Override
@@ -54,11 +55,11 @@ public class TrailerRecyclerAdapter extends RecyclerView.Adapter<TrailerRecycler
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView img_View_trailer;
+        ImageView imageView_trailer;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            img_View_trailer = itemView.findViewById(R.id.img_View_trailer);
+            imageView_trailer = itemView.findViewById(R.id.imageView_trailer);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

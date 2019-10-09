@@ -8,10 +8,10 @@
     app:cardUseCompatPadding="true"
     android:layout_gravity="center">
 
+
     <ImageView
-        android:id="@+id/img_View_trailer"
+        android:id="@+id/imageView_trailer"
         android:layout_width="160dp"
         android:layout_height="125dp"
-        android:scaleType="centerCrop" />
-
+        android:scaleType="centerCrop"  />
 </androidx.cardview.widget.CardView>

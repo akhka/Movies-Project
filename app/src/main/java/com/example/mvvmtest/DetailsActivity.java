@@ -30,6 +30,9 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Optional;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,15 +48,24 @@ public class DetailsActivity extends AppCompatActivity implements TrailerOnItemC
     private List<Review> reviews = new ArrayList<>();
     private List<Trailer> trailers = new ArrayList<>();
 
+    @BindView(R.id.imageView_details)
     ImageView imageView_details;
+    @BindView(R.id.progressBar_favorite_check)
     ProgressBar progressBar_favorite_check;
+    @BindView(R.id.imageView_favorited)
     ImageView imageView_favorited;
+    @BindView(R.id.textView_detail_title)
     TextView textView_detail_title;
+    @BindView(R.id.textView_detail_overview)
     TextView textView_detail_overview;
+    @BindView(R.id.textView_detail_avgRate)
     TextView textView_detail_avgRate;
+    @BindView(R.id.textView_detail_release)
     TextView textView_detail_release;
 
+    @BindView(R.id.recyclerView_trailers)
     RecyclerView recyclerView_trailers;
+    @BindView(R.id.recyclerView_reviewsList)
     RecyclerView recyclerView_reviews;
 
     @Override
@@ -61,25 +73,22 @@ public class DetailsActivity extends AppCompatActivity implements TrailerOnItemC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        ButterKnife.bind(this);
+
+
+
         viewModel = ViewModelProviders.of(this).get(MovieViewModel.class);
 
-        imageView_details = findViewById(R.id.imageView_details);
-        progressBar_favorite_check = findViewById(R.id.progressBar_favorite_check);
         progressBar_favorite_check.setVisibility(View.VISIBLE);
-        imageView_favorited = findViewById(R.id.imageView_favorited);
         imageView_favorited.setVisibility(View.GONE);
-        textView_detail_title = findViewById(R.id.textView_detail_title);
-        textView_detail_overview = findViewById(R.id.textView_detail_overview);
-        textView_detail_avgRate = findViewById(R.id.textView_detail_avgRate);
-        textView_detail_release = findViewById(R.id.textView_detail_release);
 
-        recyclerView_trailers = findViewById(R.id.recyclerView_trailers);
         recyclerView_trailers.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         TrailerRecyclerAdapter trailerAdapter = new TrailerRecyclerAdapter();
         trailerAdapter.setOnItemClickListener(this);
         recyclerView_trailers.setAdapter(trailerAdapter);
-        recyclerView_reviews = findViewById(R.id.recyclerView_reviews);
-        recyclerView_reviews.setLayoutManager(new LinearLayoutManager(this));
+
+        RecyclerView.LayoutManager revManager = new LinearLayoutManager(this);
+        recyclerView_reviews.setLayoutManager(revManager);
         ReviewRecyclerAdapter reviewAdapter = new ReviewRecyclerAdapter();
         recyclerView_reviews.setAdapter(reviewAdapter);
 
@@ -159,7 +168,6 @@ public class DetailsActivity extends AppCompatActivity implements TrailerOnItemC
 
                 ReviewResponse result = response.body();
                 reviews = result.getReviews();
-                System.out.println(reviews.get(0).getAuthor());
                 adapter.setReviews(reviews);
             }
 

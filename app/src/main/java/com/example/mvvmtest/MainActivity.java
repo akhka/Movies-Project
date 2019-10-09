@@ -2,35 +2,22 @@ package com.example.mvvmtest;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.view.ViewCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
-import androidx.transition.Fade;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.KeyEvent;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.mvvmtest.adapters.MovieListAdapter;
 import com.example.mvvmtest.adapters.RecyclerOnItemClickListener;
-import com.example.mvvmtest.database.AppDatabase;
-import com.example.mvvmtest.database.MovieDao;
 import com.example.mvvmtest.model.Movie;
 import com.example.mvvmtest.model.MovieResponse;
 import com.example.mvvmtest.network.ApiClient;
@@ -52,39 +39,54 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
 
     // TODO: Go to Constants.java and put your own TMDB API key
 
-    Handler mainHandler;
 
     private MovieViewModel viewModel;
     private List<Movie> mMovies;
 
     private BottomNavigationView bottomNav_home;
-    RecyclerView recycler_movies;
+    private RecyclerView recycler_movies;
+    private RecyclerView.LayoutManager lManager;
+    private  MovieListAdapter adapter;
 
     private int SELECTED = R.id.popularMenu;
+
+    private Parcelable savedRecyclerLayout;
+
+    private ArrayList<Movie> moviesInstance = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mainHandler = new Handler();
+        if (savedInstanceState != null){
+            SELECTED = savedInstanceState.getInt("menu_id");
+            moviesInstance = savedInstanceState.getParcelableArrayList("list_state");
+            savedRecyclerLayout = savedInstanceState.getParcelable("recycler_layout");
+        }
 
         bottomNav_home = findViewById(R.id.bottomNav_home);
         bottomNav_home.setOnNavigationItemSelectedListener(onNavListener);
 
         recycler_movies = findViewById(R.id.recycler_movies);
-        recycler_movies.setLayoutManager(new GridLayoutManager(this, 2));
+        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            lManager = new GridLayoutManager(this, 2);
+        } else {
+            lManager = new GridLayoutManager(this, 4);
+        }
+        recycler_movies.setLayoutManager(lManager);
         recycler_movies.setHasFixedSize(true);
 
-        final MovieListAdapter adapter = new MovieListAdapter();
+        adapter = new MovieListAdapter();
         adapter.setOnItemClickListener(this);
         recycler_movies.setAdapter(adapter);
 
-        viewModel = ViewModelProviders.of(this).get(MovieViewModel.class);
-
-        if (savedInstanceState != null){
-            SELECTED = savedInstanceState.getInt("menu_id");
+        if (savedRecyclerLayout != null){
+            recycler_movies.getLayoutManager().onRestoreInstanceState(savedRecyclerLayout);
         }
+
+        viewModel = ViewModelProviders.of(this).get(MovieViewModel.class);
 
         populateUI(recycler_movies);
 
@@ -96,7 +98,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
         super.onSaveInstanceState(outState);
 
         outState.putInt("menu_id", SELECTED);
+
+        outState.putParcelableArrayList("list_state", moviesInstance);
+        outState.putParcelable("recycler_layout", recycler_movies.getLayoutManager().onSaveInstanceState());
+
     }
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener onNavListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
@@ -144,31 +151,38 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
         } else {
             getData(sort, (MovieListAdapter) recyclerView.getAdapter());
         }
+
     }
 
 
     public void getData(String sort_type, final MovieListAdapter adapter) {
         //Toast.makeText(this, "Loading " + sort_type, Toast.LENGTH_SHORT).show();
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<MovieResponse> call = apiService.getMovies(sort_type, TMDB_API_KEY, LANGUAGE);
-        call.enqueue(new Callback<MovieResponse>() {
-            @Override
-            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                if (!response.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "code: " + response.code(), Toast.LENGTH_LONG).show();
-                    return;
+        if (moviesInstance.size() != 0){
+            adapter.setMovies(moviesInstance);
+        }
+        else {
+            ApiService apiService = ApiClient.getClient().create(ApiService.class);
+            Call<MovieResponse> call = apiService.getMovies(sort_type, TMDB_API_KEY, LANGUAGE);
+            call.enqueue(new Callback<MovieResponse>() {
+                @Override
+                public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                    if (!response.isSuccessful()) {
+                        Toast.makeText(MainActivity.this, "code: " + response.code(), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    MovieResponse result = response.body();
+                    List<Movie> list = result.getMovies();
+                    moviesInstance = (ArrayList<Movie>) list;
+                    adapter.setMovies(list);
+                    mMovies = list;
                 }
-                MovieResponse result = response.body();
-                List<Movie> list = result.getMovies();
-                adapter.setMovies(list);
-                mMovies = list;
-            }
 
-            @Override
-            public void onFailure(Call<MovieResponse> call, Throwable t) {
-                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<MovieResponse> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
 
@@ -185,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
     @Override
     public void onItemClickListener(int position) {
         Intent detailIntent = new Intent(this, DetailsActivity.class);
-        Movie clickedMovie = mMovies.get(position);
+        Movie clickedMovie = moviesInstance.get(position);
         detailIntent.putExtra("id", clickedMovie.getId());
         detailIntent.putExtra("title", clickedMovie.getTitle());
         detailIntent.putExtra("overview", clickedMovie.getOverview());
@@ -195,4 +209,5 @@ public class MainActivity extends AppCompatActivity implements RecyclerOnItemCli
         detailIntent.putExtra("isFav", clickedMovie.isFavorite());
         startActivity(detailIntent);
     }
+
 }
